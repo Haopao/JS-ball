@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>吹泡泡</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        #canvas {
+            display: block;
+            background: #222;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <script >
+        var canvas = document.querySelector('#canvas');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        window.onresize = function () {             //浏览器改变窗口大小时，初始化操作
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        };
+
+        var ctx = canvas.getContext('2d');            //获取画画工具
+//        ctx.arc(0,0,50,0,Math.PI*2,false);                     //画圆路径，圆心坐标（x,y），半径，起点位置，弧度
+//        ctx.fill();
+
+        function random(min,max) {                       //随机数
+            return (max-min)*Math.random()+min;
+        }
+        function Ball(x,y) {
+            this.x = x;
+            this.y = y;
+            this.r = random(10,20);
+            this.a =1;
+            this.colorList = ['#f0c','#f33','#3fc','#fc6','#c6f','#6fc','#3f3','pink'];
+            this.color = this.colorList[Math.floor(random(0,this.colorList.length-1))];
+            this.vx = random(-5,5);
+            this.vy = random(-5,5);
+            this.ax = 0.98;
+            this.ay = 0.98;
+            this.va = 0.95;
+            this.vr = -0.2;
+        }
+
+        Ball.prototype = {
+            draw: function () {
+                ctx.beginPath();                  //开始路径
+                ctx.fillStyle = this.color;
+                ctx.globalAlpha = this.a;
+                ctx.globalCompositeOperation = 'lighter';
+                ctx.arc(this.x,this.y,this.r,0,Math.PI*2,false);
+                ctx.fill();
+                this.update();
+            },
+            update: function () {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.a *= this.va;
+                this.r +=this.vr;
+                if (this.r<0){
+                    this.r = 0;
+                }
+    //                this.x *= this.ax;                   //移动加速度
+    //                this.y *= this.ay;
+            }
+        };
+
+        var balllist = [];
+        canvas.addEventListener('mousemove',function (e) {
+            create(e);
+        });
+
+        function create(e) {
+            var l = Math.floor(random(1,5));
+            for (var i=0;i<l;i++){
+                var ball = new Ball(e.clientX,e.clientY);
+                ball.list = balllist.length;
+                balllist.push(ball);
+            }
+        }
+
+        function render() {
+            ctx.clearRect(0,0,window.innerWidth,window.innerHeight);    //清空画布
+            balllist.forEach(function (item) {
+                item.draw();
+            });
+            if (balllist.length > 200){
+                balllist.splice(0,balllist.length-100);
+            }
+            requestAnimationFrame(render);                //动画，回调函数
+        }
+
+        render();
+
+    </script>
+
+</body>
+</html>
